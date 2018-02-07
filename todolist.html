@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>todolist</title>
+    <script src="vue.js"></script>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            list-style: none;
+        }
+        .todo{
+            width: 500px;
+            height: auto;
+            margin:30px auto;
+        }
+        .todo h3{
+            text-align: center;
+            margin:10px auto;
+        }
+        .todo .input{
+            width: 100%;
+            height: 40px;
+        }
+        .input input{
+            width: 100%;
+            height: 40px;
+            font-size: 20px;
+        }
+        .btns{
+            width: 100%;
+            height: 40px;
+             margin:20px;
+        }
+        .btns input{
+            float:left;
+            height: 30px;
+           margin-top: 5px;
+        }
+        ul,li{
+            list-style: none;
+            padding:0;
+            margin:0;
+        }
+        .listbox{
+            width: 100%;
+            height: auto;
+        }
+        .list{
+            width: 100%;
+            height: 40px;
+            border:1px solid #000;
+        }
+        .list span{
+            float: left;
+            text-align: center;
+            cursor: pointer;
+        }
+        .done{
+            width: 20px;height:20px;
+            border-radius: 50%;
+            border:1px solid black;
+            margin:10px;
+        }
+        .con,.del{
+            margin-top: 10px;
+        }
+        .del{
+            margin-right: 10px;
+        }
+
+        .list .del{
+            float: right;
+        }
+        .xg-box {
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+        .state{
+            background: red;
+        }
+        .select{
+            background:red;
+            color: white;
+        }
+        .none{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="root">
+
+    <div class="todo">
+        <h3>To do list</h3>
+        <div class="input">
+            <input type="text" v-model="con" @keydown.13="save" placeholder="请输入内容">
+        </div>
+
+        <div class="btns">
+            <input type="button" value="全部" @click="changeStatus('all')" :class="{select:status=='all'}">
+            <input type="button" value="已完成" @click="changeStatus('1')" :class="{select:status=='1'}">
+           <input type="button" value="未完成" @click="changeStatus('0')" :class="{select:status=='0'}">
+        </div>
+
+        <ul class="listbox" v-show="datas.length>0">
+            <li class="list" v-for="item in datas">
+                <div v-show="item.show" @dblclick="changeShow(item)">
+                <span class="done" @click="changeState(item)" :class="{state:item.state==1}"></span>
+                <span class="con">{{item.con}}</span>
+                <span class="del" @click="del(item.id)">删除</span>
+                </div>
+                <div v-show="!item.show" class="xg-box">
+                    <input type="text" v-model="item.con" @blur="changeShow(item)">
+                </div>
+
+            </li>
+        </ul>
+
+        <ul v-show="datas.length==0" class="none">
+            没有数据
+        </ul>
+    </div>
+
+</div>
+</body>
+<script>
+    // var arr=[
+    //     {id:1,con:"a"},
+    //     {id:2,con:"b"},
+    //     {id:3,con:"c"}
+    // ];
+    new Vue({
+        el: "#root",
+        data: {
+            title: "to-do-list",
+            con: "",
+            all: localStorage.todo ? JSON.parse(localStorage.todo) : [],
+            status: "all"
+        },
+
+        methods: {
+            save() {
+                var obj = {};
+                obj.con = this.con;
+                obj.id = new Date().getTime() + 1000 + Math.random();
+                obj.state = 0;
+                obj.show = true;
+                this.all.push(obj);
+                localStorage.todo = JSON.stringify(this.all);
+                this.con = "";
+            },
+
+
+            del(id) {
+                this.all = this.all.filter(function (item) {
+                    if (item.id !== id) {
+                        return item;
+                    }
+                });
+                localStorage.todo = JSON.stringify(this.all);
+
+            },
+
+            changeState(obj) {
+                if (obj.state == 0) {
+                    obj.state = 1;
+                } else {
+                    obj.state = 0;
+                }
+                localStorage.todo = JSON.stringify(this.all);
+            },
+            changeStatus(num) {
+                this.status = num;
+                console.log(this.status);
+            },
+            changeShow(obj) {
+                obj.show = !obj.show;
+                localStorage.todo = JSON.stringify(this.all);
+            },
+
+
+        },
+
+        computed: {
+            datas() {
+                return this.all.filter((item)=> {
+                    if (this.status == "all") {
+                        return item;
+                    } else {
+                        if (this.status ==item.state) {
+                            return item;
+                        }
+                    }
+                })
+            }
+        }
+    })
+</script>
+</html>
